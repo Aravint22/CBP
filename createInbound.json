@@ -1,0 +1,1645 @@
+{
+    "tenant": "100",
+    "systemID": "JTD410",
+    "epic": "SCH-SUPPLIER",
+    "pageName": "InboundShipment",
+    "version": "Grid",
+    "showWorkflowActions": false,
+    "showPageBanner": false,
+    "roles": [
+        "ES-SPECIFIC-INB-DBS",
+        "ES-SPECIFIC-VENDOR-InbShipment"
+    ],
+    "searchBar": {
+        "readOnly": false,
+        "hidden": true
+    },
+    "businessComponentDesc": "InboundShipment",
+    "businessComponent": "InboundShipment",
+    "businessComponentInstance": "InboundShipment",
+    "sweetAlert": true,
+    "dataSource": [
+        {
+            "dataSourceType": "businessView",
+            "dataSourceName": "inboundUserBV",
+            "dataSourceDetails": {
+                "businessView": "inboundUserBV"
+            }
+        },
+        {
+            "dataSourceType": "businessView",
+            "dataSourceName": "InbdShmentCstBV",
+            "dataSourceDetails": {
+                "businessView": "InbdShmentCstBV"
+            }
+        },
+        {
+            "dataSourceType": "businessView",
+            "dataSourceName": "ISRbankTableBV",
+            "dataSourceDetails": {
+                "businessView": "ISRbankTableBV"
+            }
+        },
+        {
+            "dataSourceType": "businessView",
+            "dataSourceName": "ISR_PoDetailsBV",
+            "dataSourceDetails": {
+                "businessView": "ISR_PoDetailsBV"
+            }
+        },
+        {
+            "dataSourceType": "businessView",
+            "dataSourceName": "IndInvStatusBV",
+            "dataSourceDetails": {
+                "businessView": "IndInvStatusBV"
+            }
+        }
+    ],
+    "pageActions": [
+        {
+            "text": "Save as draft",
+            "type": "submit",
+            "icon": "",
+            "showLabel": true,
+            "style": "style2",
+            "disableFormValidation": true,
+            "css": {
+                "font-size": "16px",
+                "color": "#52a5fb",
+                "cursor": "pointer"
+            },
+            "onClick": [
+                {
+                    "actions": [
+                        {
+                            "action": "executePageAction",
+                            "checkCondition": [
+                                {
+                                    "source": "Count",
+                                    "failureMessage": "This entered Invoice Number already Exist. Enter the new Invoice Number before drafting",
+                                    "sourceComponentId": "statusCount",
+                                    "sourceType": "sectionComponent",
+                                    "sourceSectionComponentId": "1",
+                                    "operation": "NE",
+                                    "valueof": {
+                                        "value": 2
+                                    }
+                                }
+                            ],
+                            "actionPerformed": "draft"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "text": "Submit",
+            "type": "submit",
+            "icon": "",
+            "showLabel": true,
+            "style": "style2",
+            "disableFormValidation": false,
+            "css": {
+                "font-size": "16px",
+                "color": "#52a5fb",
+                "cursor": "pointer"
+            },
+            "onClick": [
+                {
+                    "actions": [
+                        {
+                            "action": "executePageAction",
+                            "checkCondition": [
+                                {
+                                    "source": "Count",
+                                    "failureMessage": "This entered Invoice Number already Exist. Enter the new Invoice Number",
+                                    "sourceComponentId": "statusCount",
+                                    "sourceType": "sectionComponent",
+                                    "sourceSectionComponentId": "1",
+                                    "operation": "NE",
+                                    "valueof": {
+                                        "value": 2
+                                    }
+                                },
+                                {
+                                    "failureMessage": "Grn Not Posted",
+                                    "source": "countOfTableRows",
+                                    "params": [
+                                        {
+                                            "componentId": "poDetails"
+                                        }
+                                    ],
+                                    "sourceType": "function",
+                                    "operation": "GT",
+                                    "valueof": {
+                                        "value": 0
+                                    }
+                                },
+                                {
+                                    "failureMessage": "GRN Not Posted",
+                                    "source": "countOfTableRows",
+                                    "params": [
+                                        {
+                                            "componentId": "shipmentCst"
+                                        }
+                                    ],
+                                    "sourceType": "function",
+                                    "operation": "GT",
+                                    "valueof": {
+                                        "value": 0
+                                    }
+                                }
+                            ],
+                            "actionPerformed": "submit"
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "executePageActions": [
+        {
+            "ID": 1,
+            "Rule": "pageAction",
+            "RuleGroup": "",
+            "WHEN": "'{{payload.pageActionPerformed}}' == 'submit'",
+            "THEN": [
+                "performAction"
+            ],
+            "Actions": [
+                {
+                    "id": 1,
+                    "actionName": "poDetailsMap",
+                    "actionType": "mapFields",
+                    "actionDetails": {
+                        "sourceSchema": "{{payload.selectedRows.poDetails.selectedRows}}",
+                        "targetSchema": {
+                            "invoiceItemNr": {
+                                "type": "string",
+                                "relatedField": "system.arrayIndex"
+                            },
+                            "deliveryNo": {
+                                "type": "string",
+                                "relatedField": "['Delivery No']['text']"
+                            },
+                            "poNumber": {
+                                "type": "string",
+                                "relatedField": "['PO Number']['text']"
+                            },
+                            "poItem": {
+                                "type": "string",
+                                "relatedField": "['Item']['text']"
+                            },
+                            "mainSupplier": {
+                                "type": "string",
+                                "relatedField": "['Main Suppliers']['text']"
+                            },
+                            "item": {
+                                "type": "string",
+                                "relatedField": "['Material']['text']"
+                            },
+                            "qty": {
+                                "type": "string",
+                                "relatedField": "['Quantity']['text']"
+                            },
+                            "uom": {
+                                "type": "string",
+                                "relatedField": "['UOM']['text']"
+                            },
+                            "grQty": {
+                                "type": "string",
+                                "relatedField": "['GR Qty']['text']"
+                            },
+                            "materialDescription": {
+                                "type": "string",
+                                "relatedField": "['Material Description']['text']"
+                            },
+                            "grossWeight": {
+                                "type": "string",
+                                "relatedField": "['Gross Weight']['text']"
+                            },
+                            "netWeight": {
+                                "type": "string",
+                                "relatedField": "['Net Weight']['text']"
+                            },
+                            "wtUom": {
+                                "type": "string",
+                                "relatedField": "['Weight UOM']['text']"
+                            },
+                            "deliveryQty": {
+                                "type": "string",
+                                "relatedField": "['Delivery Quantity']['text']"
+                            },
+                            "delvryChargesAed": {
+                                "type": "string",
+                                "relatedField": "['Delivery Charges(AED)']['text']"
+                            },
+                            "vendorNo": {
+                                "type": "string",
+                                "relatedField": "['Vendor']['text']"
+                            },
+                            "locCurrency": {
+                                "type": "string",
+                                "relatedField": "['Loc Currency']['text']"
+                            },
+                            "stepId": {
+                                "type": "string",
+                                "relatedField": "['Step ID']['text']"
+                            },
+                            "counterId": {
+                                "type": "string",
+                                "relatedField": "['Counter Id']['text']"
+                            },
+                            "refDocAndItem": {
+                                "type": "string",
+                                "relatedField": "['refDocAndItem']['text']"
+                            },
+                            "deliveryDate": {
+                                "type": "string",
+                                "relatedField": "['Delivery Date']['text']"
+                            }
+                        }
+                    }
+                },
+                {
+                    "id": 2,
+                    "actionName": "shipmentCstMap",
+                    "actionType": "mapFields",
+                    "actionDetails": {
+                        "sourceSchema": "{{payload.selectedRows.shipmentCst.selectedRows}}",
+                        "targetSchema": {
+                            "item": {
+                                "type": "string",
+                                "relatedField": "['Item']['text']"
+                            },
+                            "category": {
+                                "type": "string",
+                                "relatedField": "['Category']['text']"
+                            },
+                            "serviceAgent": {
+                                "type": "string",
+                                "relatedField": "['Service Agent']['text']"
+                            },
+                            "netValue": {
+                                "type": "string",
+                                "relatedField": "['Net Value']['text']"
+                            },
+                            "currency": {
+                                "type": "string",
+                                "relatedField": "['Currency']['text']"
+                            },
+                            "description": {
+                                "type": "string",
+                                "relatedField": "['Description']['text']"
+                            },
+                            "comment": {
+                                "type": "string",
+                                "relatedField": "['Comments']['text']"
+                            }
+                        }
+                    }
+                },
+                {
+                    "id": 3,
+                    "actionName": "insertISData",
+                    "actionType": "insertData",
+                    "actionDetails": {
+                        "database_details": {
+                            "database": "{{payload.headers.dbName}}",
+                            "collection": "InboundShipment"
+                        },
+                        "primaryKey": {
+                            "fieldName": "schReferenceNumber",
+                            "prefix": "INBINV00000"
+                        },
+                        "payload": {
+                            "transporterName": "{{payload.section_1.transporterName}}",
+                            "refNumber": "{{toString payload.section_1.refNumber}}",
+                            "sapAssociateNumber": "{{payload.section_1.sapAssociateNumber}}",
+                            "requestedName": "{{payload.section_1.requestedName}}",
+                            "shipperName": "{{payload.section_1.shipperName}}",
+                            "remarks": "{{payload.section_1.remarks}}",
+                            "status": "Invoice Submitted",
+                            "requestDate": "{{payload.section_1.currentDate}}",
+                            "invoiceDate": "{{payload.section_1.invoiceDate2}}",
+                            "consigneeName": "{{payload.section_1.consigneeName}}",
+                            "blNumber": "{{payload.section_1.blNumber}}",
+                            "portofLoading": "{{payload.section_1.portofLoading}}",
+                            "portofDischarge": "{{payload.section_1.portofDischarge}}",
+                            "invoiceNumber": "{{payload.section_1.invoiceNumber}}",
+                            "modeOfTransport": "{{payload.section_1.modeOfTransport}}",
+                            "invoice": "{{payload.section_4.invoice}}",
+                            "others": "{{payload.section_4.others}}",
+                            "inboundComment": "{{payload.section_5.inboundComment}}",
+                            "invoiceAmt": "{{payload.section_4.invoiceAmt1}}",
+                            "shipmentCost": "{{actionsResponse.shipmentCstMap}}",
+                            "poDetails": "{{actionsResponse.poDetailsMap}}",
+                            "servicePartnerNumber": "{{payload.section_1.servicePartnerNumber}}",
+                            "bankAccountNumber": "{{payload.section_BankDetails.bankAccountNumber}}",
+                            "bankName": "{{payload.section_BankDetails.bankName}}",
+                            "bankKey": "{{payload.section_BankDetails.bankKey}}",
+                            "accountHolderName": "{{payload.section_BankDetails.AccountHolderName}}",
+                            "bankAddress": "{{payload.section_BankDetails.bankAddress}}",
+                            "iban": "{{payload.section_BankDetails.iban}}",
+                            "swiftIfscCode": "{{payload.section_BankDetails.swiftIfscCode}}",
+                            "bankCountry": "{{payload.section_BankDetails.bankCountry}}",
+                            "createdYear": "{{timeStamp YYYY}}"
+                        }
+                    }
+                },
+                {
+                    "id": 4,
+                    "actionName": "collectionData",
+                    "actionType": "getDataFromDB",
+                    "actionDetails": {
+                        "database_details": {
+                            "database": "{{payload.headers.dbName}}",
+                            "collection": "user"
+                        },
+                        "defaultSortSetting": {
+                            "sortField": "",
+                            "sortDirection": -1
+                        },
+                        "aggregation": [
+                            {
+                                "($)match": {
+                                    "userId": "{{payload.headers.userId}}"
+                                }
+                            },
+                            {
+                                "($)facet": {
+                                    "paginatedResults": [
+                                        {
+                                            "($)project": {
+                                                "_id": 0,
+                                                "email": 1,
+                                                "firstName": 1
+                                            }
+                                        }
+                                    ],
+                                    "totalCount": [
+                                        {
+                                            "($)count": "count"
+                                        }
+                                    ]
+                                }
+                            }
+                        ]
+                    }
+                },
+                {
+                    "id": 5,
+                    "actionName": "publishEvent",
+                    "actionType": "workflowPublishEvent",
+                    "async": false,
+                    "actionDetails": {
+                        "Body": {
+                            "Action": "Create",
+                            "Tenant": "{{payload.headers.tenant}}",
+                            "Message": null,
+                            "Remarks": "",
+                            "Event_Id": "Import_Shipment_Approval",
+                            "Initiator": "{{payload.headers.userId}}",
+                            "User_Agent": null,
+                            "Workflow_Id": null,
+                            "Context_Data": {
+                                "schReferenceNumber": "{{actionsResponse.insertISData.schReferenceNumber}}",
+                                "userId": "{{payload.headers.userId}}",
+                                "tenant": "{{payload.headers.tenant}}",
+                                "userName": "{{actionsResponse.collectionData[0].paginatedResults[0].firstName}}",
+                                "Email initiator": "{{actionsResponse.collectionData[0].paginatedResults[0].email}}",
+                                "WF_BASE_URL": "{{payload.baseUrl}}"
+                            },
+                            "Trigger_Date": "{{timeStamp YYYY-MM-DD}}",
+                            "Work_Item_Id": null,
+                            "Business_Comp_Id": "InboundShipment",
+                            "Business_Comp_Instance_Id": "{{actionsResponse.insertISData.schReferenceNumber}}"
+                        }
+                    }
+                }
+            ],
+            "Output": {
+                "message": "Inbound Shipment Request {{actionsResponse.insertISData.schReferenceNumber}} Submitted Sucessfully",
+                "routerLink": "/page/InboundShipmentList",
+                "redirect": {
+                    "routerLink": "/page/InboundShipmentList",
+                    "params": {}
+                }
+            }
+        },
+        {
+            "ID": 1,
+            "Rule": "pageAction",
+            "RuleGroup": "",
+            "WHEN": "'{{payload.pageActionPerformed}}' == 'draft'",
+            "THEN": [
+                "performAction"
+            ],
+            "Actions": [
+                {
+                    "id": 1,
+                    "actionName": "poDetailsMap",
+                    "actionType": "mapFields",
+                    "actionDetails": {
+                        "sourceSchema": "{{payload.selectedRows.poDetails.selectedRows}}",
+                        "targetSchema": {
+                            "invoiceItemNr": {
+                                "type": "string",
+                                "relatedField": "system.arrayIndex"
+                            },
+                            "deliveryNo": {
+                                "type": "string",
+                                "relatedField": "['Delivery No']['text']"
+                            },
+                            "poNumber": {
+                                "type": "string",
+                                "relatedField": "['PO Number']['text']"
+                            },
+                            "poItem": {
+                                "type": "string",
+                                "relatedField": "['Item']['text']"
+                            },
+                            "mainSupplier": {
+                                "type": "string",
+                                "relatedField": "['Main Suppliers']['text']"
+                            },
+                            "item": {
+                                "type": "string",
+                                "relatedField": "['Material']['text']"
+                            },
+                            "materialDescription": {
+                                "type": "string",
+                                "relatedField": "['Material Description']['text']"
+                            },
+                            "grossWeight": {
+                                "type": "string",
+                                "relatedField": "['Gross Weight']['text']"
+                            },
+                            "netWeight": {
+                                "type": "string",
+                                "relatedField": "['Net Weight']['text']"
+                            },
+                            "wtUom": {
+                                "type": "string",
+                                "relatedField": "['Weight UOM']['text']"
+                            },
+                            "qty": {
+                                "type": "string",
+                                "relatedField": "['Quantity']['text']"
+                            },
+                            "deliveryQty": {
+                                "type": "string",
+                                "relatedField": "['Delivery Quantity']['text']"
+                            },
+                            "uom": {
+                                "type": "string",
+                                "relatedField": "['UOM']['text']"
+                            },
+                            "grQty": {
+                                "type": "string",
+                                "relatedField": "['GR Qty']['text']"
+                            },
+                            "delvryChargesAed": {
+                                "type": "string",
+                                "relatedField": "['Delivery Charges(AED)']['text']"
+                            },
+                            "vendorNo": {
+                                "type": "string",
+                                "relatedField": "['Vendor']['text']"
+                            },
+                            "locCurrency": {
+                                "type": "string",
+                                "relatedField": "['Loc Currency']['text']"
+                            },
+                            "stepId": {
+                                "type": "int",
+                                "relatedField": "['Step ID']['text']"
+                            },
+                            "counterId": {
+                                "type": "int",
+                                "relatedField": "['Counter Id']['text']"
+                            },
+                            "deliveryDate": {
+                                "type": "string",
+                                "relatedField": "['Delivery Date']['text']"
+                            }
+                        }
+                    }
+                },
+                {
+                    "id": 2,
+                    "actionName": "shipmentCstMap",
+                    "actionType": "mapFields",
+                    "actionDetails": {
+                        "sourceSchema": "{{payload.selectedRows.shipmentCst.selectedRows}}",
+                        "targetSchema": {
+                            "item": {
+                                "type": "string",
+                                "relatedField": "['Item']['text']"
+                            },
+                            "category": {
+                                "type": "string",
+                                "relatedField": "['Category']['text']"
+                            },
+                            "serviceAgent": {
+                                "type": "string",
+                                "relatedField": "['Service Agent']['text']"
+                            },
+                            "netValue": {
+                                "type": "string",
+                                "relatedField": "['Net Value']['text']"
+                            },
+                            "currency": {
+                                "type": "string",
+                                "relatedField": "['Currency']['text']"
+                            },
+                            "description": {
+                                "type": "string",
+                                "relatedField": "['Description']['text']"
+                            },
+                            "comment": {
+                                "type": "string",
+                                "relatedField": "['Comments']['text']"
+                            }
+                        }
+                    }
+                },
+                {
+                    "id": 3,
+                    "actionName": "insertISData",
+                    "actionType": "insertData",
+                    "actionDetails": {
+                        "database_details": {
+                            "database": "{{payload.headers.dbName}}",
+                            "collection": "InboundShipment"
+                        },
+                        "primaryKey": {
+                            "fieldName": "schReferenceNumber",
+                            "prefix": "INBINV00000"
+                        },
+                        "payload": {
+                            "transporterName": "{{payload.section_1.transporterName}}",
+                            "refNumber": "{{toString payload.section_1.refNumber}}",
+                            "sapAssociateNumber": "{{payload.section_1.sapAssociateNumber}}",
+                            "requestedName": "{{payload.section_1.requestedName}}",
+                            "shipperName": "{{payload.section_1.shipperName}}",
+                            "remarks": "{{payload.section_1.remarks}}",
+                            "status": "Draft",
+                            "requestDate": "{{payload.section_1.currentDate}}",
+                            "invoiceDate": "{{payload.section_1.invoiceDate2}}",
+                            "consigneeName": "{{payload.section_1.consigneeName}}",
+                            "blNumber": "{{payload.section_1.blNumber}}",
+                            "portofLoading": "{{payload.section_1.portofLoading}}",
+                            "portofDischarge": "{{payload.section_1.portofDischarge}}",
+                            "invoiceNumber": "{{payload.section_1.invoiceNumber}}",
+                            "modeOfTransport": "{{payload.section_1.modeOfTransport}}",
+                            "invoice": "{{payload.section_4.invoice}}",
+                            "others": "{{payload.section_4.others}}",
+                            "inboundComment": "{{payload.section_5.inboundComment}}",
+                            "invoiceAmt": "{{payload.section_4.invoiceAmt1}}",
+                            "poDetails": "{{actionsResponse.poDetailsMap}}",
+                            "shipmentCost": "{{actionsResponse.shipmentCstMap}}",
+                            "servicePartnerNumber": "{{payload.section_1.servicePartnerNumber}}",
+                            "bankAccountNumber": "{{payload.section_BankDetails.bankAccountNumber}}",
+                            "bankName": "{{payload.section_BankDetails.bankName}}",
+                            "bankKey": "{{payload.section_BankDetails.bankKey}}",
+                            "accountHolderName": "{{payload.section_BankDetails.AccountHolderName}}",
+                            "bankAddress": "{{payload.section_BankDetails.bankAddress}}",
+                            "iban": "{{payload.section_BankDetails.iban}}",
+                            "swiftIfscCode": "{{payload.section_BankDetails.swiftIfscCode}}",
+                            "bankCountry": "{{payload.section_BankDetails.bankCountry}}",
+                            "createdYear": "{{timeStamp YYYY}}"
+                        }
+                    }
+                }
+            ],
+            "Output": {
+                "message": "Inbound Shipment Request {{actionsResponse.insertISData.schReferenceNumber}} Drafted Sucessfully",
+                "routerLink": "/page/InboundShipmentList",
+                "redirect": {
+                    "routerLink": "/page/InboundShipmentList",
+                    "params": {}
+                }
+            }
+        }
+    ],
+    "pageBanner": {
+        "Business_Comp_Name": "InboundShipment",
+        "Title": "",
+        "Screen_Name": "Insert Page",
+        "Description": "This page is managed by library admin to Insert"
+    },
+    "rows": [
+        {
+            "columns": [
+                {
+                    "components": [
+                        {
+                            "componentId": "1",
+                            "type": "section",
+                            "title": "Invoice Details",
+                            "Description": "Invoice Details",
+                            "icon": "",
+                            "dataSourceName": "",
+                            "headerComponents": [],
+                            "sectionBody": {
+                                "style": "style1",
+                                "rows": [
+                                    {
+                                        "columns": [
+                                            {
+                                                "width": "20%",
+                                                "components": [
+                                                    {
+                                                        "label": "Vendor/Transporter Name",
+                                                        "type": "text",
+                                                        "dataSourceName": "inboundUserBV",
+                                                        "dbColumnName": "transporterName",
+                                                        "formcontrol": "transporterName",
+                                                        "componentId": "transporterName",
+                                                        "readOnly": "transporterName"
+                                                    },
+                                                    {
+                                                        "label": "SAP Associate Number",
+                                                        "type": "text",
+                                                        "dataSourceName": "inboundUserBV",
+                                                        "dbColumnName": "sapAssociateNumber",
+                                                        "formcontrol": "sapAssociateNumber",
+                                                        "componentId": "sapAssociateNumber",
+                                                        "readOnly": "sapAssociateNumber"
+                                                    },
+                                                    {
+                                                        "label": "Shipper Name",
+                                                        "type": "text",
+                                                        "mandatory": true,
+                                                        "dbColumnName": "shipperName",
+                                                        "dataSourceName": "",
+                                                        "formcontrol": "shipperName",
+                                                        "componentId": "shipperName"
+                                                    },
+                                                    {
+                                                        "label": "Consignee Name",
+                                                        "type": "text",
+                                                        "dbColumnName": "consigneeName",
+                                                        "value": "ESA",
+                                                        "mandatory": true,
+                                                        "dataSourceName": "",
+                                                        "readOnly": "consigneeName",
+                                                        "formcontrol": "consigneeName",
+                                                        "componentId": "consigneeName"
+                                                    },
+                                                    {
+                                                        "label": "Partner SAP Associate No",
+                                                        "type": "text",
+                                                        "checkRole": {
+                                                            "value": [
+                                                                {
+                                                                    "value": "{{inputParams['selectedRows']['Partner']['0']}}",
+                                                                    "roles": [
+                                                                        "ES-SPECIFIC-INB-DBS"
+                                                                    ]
+                                                                }
+                                                            ]
+                                                        },
+                                                        "dataSourceName": "inboundUserBV",
+                                                        "dbColumnName": "servicePartnerNumber",
+                                                        "formcontrol": "servicePartnerNumber",
+                                                        "componentId": "servicePartnerNumber",
+                                                        "hidden": true,
+                                                        "readOnly": "sapAssociateNumber"
+                                                    },
+                                                    {}
+                                                ]
+                                            },
+                                            {
+                                                "width": "20%",
+                                                "components": [
+                                                    {
+                                                        "label": "Created on",
+                                                        "type": "text",
+                                                        "dbColumnName": "currentDate",
+                                                        "readOnly": "currentDate",
+                                                        "componentId": "currentDate",
+                                                        "dataSourceName": "",
+                                                        "value": "{{timeStamp DD-MM-YYYY}}",
+                                                        "formcontrol": "currentDate"
+                                                    },
+                                                    {
+                                                        "label": "Invoice Date",
+                                                        "type": "date",
+                                                        "mandatory": true,
+                                                        "dbColumnName": "invoiceDate2",
+                                                        "dataSourceName": "",
+                                                        "formcontrol": "invoiceDate2",
+                                                        "componentId": "invoiceDate2",
+                                                        "value": ""
+                                                    },
+                                                    {
+                                                        "label": "Reference Number",
+                                                        "type": "text",
+                                                        "checkRole": {
+                                                            "value": [
+                                                                {
+                                                                    "value": "{{inputParams['selectedRows']['refNumber']['0']}}",
+                                                                    "roles": [
+                                                                        "ES-SPECIFIC-INB-DBS"
+                                                                    ]
+                                                                },
+                                                                {
+                                                                    "value": "{{inputParams.refNumber}}",
+                                                                    "roles": [
+                                                                        "ES-SPECIFIC-VENDOR-InbShipment"
+                                                                    ]
+                                                                }
+                                                            ]
+                                                        },
+                                                        "dataSourceName": "",
+                                                        "dbColumnName": "refNumber",
+                                                        "formcontrol": "refNumber",
+                                                        "componentId": "refNumber",
+                                                        "readOnly": "refNumber"
+                                                    },
+                                                    {
+                                                        "label": "Remarks",
+                                                        "type": "textarea",
+                                                        "mandatory": true,
+                                                        "width": "300%",
+                                                        "dbColumnName": "remarks",
+                                                        "dataSourceName": "",
+                                                        "formcontrol": "remarks",
+                                                        "componentId": "remarks"
+                                                    }
+                                                ]
+                                            },
+                                            {
+                                                "width": "25%",
+                                                "components": [
+                                                    {
+                                                        "label": "Created by",
+                                                        "type": "text",
+                                                        "dbColumnName": "requestedName",
+                                                        "dataSourceName": "inboundUserBV",
+                                                        "displayStyle": "verticalKeyValue",
+                                                        "formcontrol": "requestedName",
+                                                        "componentId": "requestedName",
+                                                        "readOnly": "requestedName"
+                                                    },
+                                                    {
+                                                        "label": "BL Number",
+                                                        "type": "text",
+                                                        "mandatory": true,
+                                                        "dbColumnName": "blNumber",
+                                                        "dataSourceName": "",
+                                                        "displayStyle": "verticalKeyValue",
+                                                        "formcontrol": "blNumber",
+                                                        "componentId": "blNumber",
+                                                        "readOnly": "false"
+                                                    },
+                                                    {
+                                                        "label": "Port of Loading",
+                                                        "type": "select",
+                                                        "placeholder": "Country",
+                                                        "dbColumnName": "portofLoading",
+                                                        "mandatory": true,
+                                                        "option": true,
+                                                        "onChangeGetData": true,
+                                                        "filter": true,
+                                                        "closeOnSelect": true,
+                                                        "style": "style3",
+                                                        "sendAllFieldsInSelectedValueAsObject": false,
+                                                        "dataSource": {
+                                                            "method": "GET",
+                                                            "params": {
+                                                                "module": "test",
+                                                                "screen": "test",
+                                                                "activity": "test"
+                                                            },
+                                                            "url": "/associate_service/vendors/getCountry",
+                                                            "optionArrayKey": "country",
+                                                            "dropDownKey": "country_name",
+                                                            "dropDownValue": "country_name"
+                                                        },
+                                                        "formcontrol": "portofLoading",
+                                                        "componentId": "portofLoading"
+                                                    },
+                                                    {},
+                                                    {}
+                                                ]
+                                            },
+                                            {
+                                                "width": "25%",
+                                                "components": [
+                                                    {
+                                                        "label": "Invoice Number",
+                                                        "type": "text",
+                                                        "dbColumnName": "invoiceNumber",
+                                                        "mandatory": true,
+                                                        "dataSourceName": "",
+                                                        "displayStyle": "verticalKeyValue",
+                                                        "formcontrol": "invoiceNumber",
+                                                        "componentId": "invoiceNumber",
+                                                        "onChange": [
+                                                            {
+                                                                "actions": [
+                                                                    {
+                                                                        "action": "loadTable",
+                                                                        "actionDetails": {
+                                                                            "targetTableComponentId": "historyInvoice",
+                                                                            "payload": {
+                                                                                "selectedInvNumber": {
+                                                                                    "valueof": {
+                                                                                        "type": "currentComponent"
+                                                                                    }
+                                                                                },
+                                                                                "selectedInvNumber1": {
+                                                                                    "valueof": {
+                                                                                        "type": "sectionComponent",
+                                                                                        "sourceComponentId": "sapAssociateNumber",
+                                                                                        "sourceSectionComponentId": "1"
+                                                                                    }
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                    },
+                                                                    {
+                                                                        "action": "changeColumnValueFromSection",
+                                                                        "actionDetails": {
+                                                                            "targetTableComponentId": "historyInvoice",
+                                                                            "targetColumnName": "Invoice Number",
+                                                                            "setValue": {
+                                                                                "valueof": {
+                                                                                    "type": "currentComponent"
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                ]
+                                                            }
+                                                        ]
+                                                    },
+                                                    {
+                                                        "label": "Mode of Transport",
+                                                        "type": "text",
+                                                        "mandatory": true,
+                                                        "dbColumnName": "modeOfTransport",
+                                                        "dataSourceName": "",
+                                                        "displayStyle": "verticalKeyValue",
+                                                        "formcontrol": "modeOfTransport",
+                                                        "componentId": "modeOfTransport"
+                                                    },
+                                                    {
+                                                        "label": "Port of Discharge",
+                                                        "type": "select",
+                                                        "placeholder": "Country",
+                                                        "dbColumnName": "portofDischarge",
+                                                        "mandatory": true,
+                                                        "option": true,
+                                                        "onChangeGetData": true,
+                                                        "filter": true,
+                                                        "closeOnSelect": true,
+                                                        "style": "style3",
+                                                        "sendAllFieldsInSelectedValueAsObject": false,
+                                                        "dataSource": {
+                                                            "method": "GET",
+                                                            "params": {
+                                                                "module": "test",
+                                                                "screen": "test",
+                                                                "activity": "test"
+                                                            },
+                                                            "url": "/associate_service/vendors/getCountry",
+                                                            "optionArrayKey": "country",
+                                                            "dropDownKey": "country_name",
+                                                            "dropDownValue": "country_name"
+                                                        },
+                                                        "formcontrol": "portofDischarge",
+                                                        "componentId": "portofDischarge"
+                                                    },
+                                                    {
+                                                        "label": "requestedBy",
+                                                        "type": "text",
+                                                        "dbColumnName": "requestedBy",
+                                                        "dataSourceName": "inboundUserBV",
+                                                        "displayStyle": "verticalKeyValue",
+                                                        "formcontrol": "requestedBy",
+                                                        "componentId": "requestedBy",
+                                                        "readOnly": "requestedBy",
+                                                        "hidden": true
+                                                    },
+                                                    {
+                                                        "type": "number",
+                                                        "dbColumnName": "statusCount",
+                                                        "label": "Count",
+                                                        "hidden": true,
+                                                        "dataSourceName": "SelectedPR",
+                                                        "displayStyle": "horizontalKeyValue",
+                                                        "formControl": "statusCount",
+                                                        "componentId": "statusCount"
+                                                    },
+                                                    {},
+                                                    {},
+                                                    {}
+                                                ]
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "columns": [
+                {
+                    "components": [
+                        {
+                            "componentId": "historyInvoice",
+                            "type": "table",
+                            "title": "Invoice Number History",
+                            "hidden": false,
+                            "description": "",
+                            "dataSourceName": "IndInvStatusBV",
+                            "icon": "P O",
+                            "tableConfig": {
+                                "businessComponent": "PO",
+                                "collapseWhenEmpty": true,
+                                "layoutIcon": false,
+                                "downloadIcon": false,
+                                "columnFilterIcon": false,
+                                "rowFilterIcon": false,
+                                "fullscreenIcon": true,
+                                "sorting": false,
+                                "aggregationFooter": false,
+                                "checkbox": false,
+                                "uniqueColumns": [],
+                                "headerActions": [],
+                                "style": "style4",
+                                "downloadActions": [],
+                                "DataDownload": {}
+                            },
+                            "tableColumns": {
+                                "Invoice Number": {
+                                    "type": "text",
+                                    "dataSourceName": "IndInvStatusBV",
+                                    "dbColumnName": "invoiceNumber",
+                                    "hidden": false
+                                },
+                                "date": {
+                                    "mandatory": false,
+                                    "type": "text",
+                                    "hidden": true,
+                                    "dbColumnName": "actualYear",
+                                    "componentId": "actualYear"
+                                },
+                                "SCH Status": {
+                                    "type": "status",
+                                    "dataSourceName": "IndInvStatusBV",
+                                    "dbColumnName": "status",
+                                    "hidden": false
+                                },
+                                "Count": {
+                                    "type": "number",
+                                    "dataSourceName": "IndInvStatusBV",
+                                    "dbColumnName": "statusCheck",
+                                    "hidden": true,
+                                    "onLoad": [
+                                        {
+                                            "actions": [
+                                                {
+                                                    "action": "updateSection",
+                                                    "actionDetails": {
+                                                        "targetSectionId": "1",
+                                                        "targetField": [
+                                                            "statusCount"
+                                                        ],
+                                                        "setValue": {
+                                                            "sumOfRows": [
+                                                                {
+                                                                    "valueof": {
+                                                                        "type": "columnName",
+                                                                        "fieldId": "Count"
+                                                                    }
+                                                                }
+                                                            ]
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                },
+                                "Invoice Year": {
+                                    "type": "text",
+                                    "dataSourceName": "IndInvStatusBV",
+                                    "dbColumnName": "createdYear",
+                                    "hidden": true
+                                }
+                            },
+                            "tableOnChange": [
+                                {
+                                    "actions": [
+                                        {
+                                            "action": "updateSection",
+                                            "actionDetails": {
+                                                "targetSectionId": "invoiceDetails",
+                                                "targetField": [
+                                                    "statusCount"
+                                                ],
+                                                "setValue": {
+                                                    "sumOfRows": [
+                                                        {
+                                                            "valueof": {
+                                                                "type": "columnName",
+                                                                "fieldId": "Count"
+                                                            }
+                                                        }
+                                                    ]
+                                                }
+                                            }
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "columns": [
+                {
+                    "components": [
+                        {
+                            "componentId": "poDetails",
+                            "type": "table",
+                            "title": "Delivery details",
+                            "description": "",
+                            "hidden": false,
+                            "dataSourceName": "ISR_PoDetailsBV",
+                            "tableConfig": {
+                                "aggregationFooter": true,
+                                "checkbox": false,
+                                "downloadIcon": false,
+                                "columnFilterIcon": true,
+                                "rowFilterIcon": true,
+                                "localPagination": true,
+                                "fullscreenIcon": true,
+                                "uniqueColumns": [
+                                    "SNO"
+                                ]
+                            },
+                            "tableColumns": {
+                                "SNO": {
+                                    "mandatory": false,
+                                    "type": "uiRowIndex",
+                                    "sticky": true,
+                                    "dbColumnName": "sno",
+                                    "formcontrol": "sno",
+                                    "componentId": "sno",
+                                    "hidden": false
+                                },
+                                "PO Number": {
+                                    "type": "text",
+                                    "readOnly": "poNumber",
+                                    "dbColumnName": "poNumber"
+                                },
+                                "Item": {
+                                    "type": "text",
+                                    "dbColumnName": "poItem"
+                                },
+                                "Main Suppliers": {
+                                    "type": "text",
+                                    "wordWrap": true,
+                                    "dbColumnName": "mainSupplier",
+                                    "width": "m"
+                                },
+                                "Material": {
+                                    "type": "text",
+                                    "dbColumnName": "item",
+                                    "width": "m"
+                                },
+                                "Material Description": {
+                                    "type": "text",
+                                    "dbColumnName": "materialDescription",
+                                    "wordWrap": true,
+                                    "width": "l"
+                                },
+                                "Delivery Quantity": {
+                                    "type": "number",
+                                    "dbColumnName": "deliveryQty",
+                                    "textAlign": "right"
+                                },
+                                "UOM": {
+                                    "type": "text",
+                                    "dbColumnName": "uom"
+                                },
+                                "GR Qty": {
+                                    "type": "number",
+                                    "hidden": true,
+                                    "dbColumnName": "quantity",
+                                    "textAlign": "right"
+                                },
+                                "Delivery Charges(AED)": {
+                                    "type": "number",
+                                    "dbColumnName": "chargAmt",
+                                    "textAlign": "right",
+                                    "width": "m",
+                                    "onLoad": [
+                                        {
+                                            "actions": [
+                                                {
+                                                    "action": "updateSection",
+                                                    "actionDetails": {
+                                                        "targetSectionId": "4",
+                                                        "targetField": [
+                                                            "invoiceAmt1"
+                                                        ],
+                                                        "setValue": {
+                                                            "sumOfRows": [
+                                                                {
+                                                                    "valueof": {
+                                                                        "type": "columnName",
+                                                                        "fieldId": "Delivery Charges(AED)"
+                                                                    }
+                                                                }
+                                                            ]
+                                                        },
+                                                        "validation": [
+                                                            {
+                                                                "type": "maxDecimalDigits",
+                                                                "valueof": {
+                                                                    "value": 2
+                                                                }
+                                                            }
+                                                        ]
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                },
+                                "Vendor": {
+                                    "type": "text",
+                                    "hidden": true,
+                                    "dbColumnName": "chargVendor",
+                                    "width": "m"
+                                },
+                                "Loc Currency": {
+                                    "type": "text",
+                                    "hidden": true,
+                                    "dbColumnName": "chargLocCurr",
+                                    "width": "m"
+                                },
+                                "Step ID": {
+                                    "type": "text",
+                                    "hidden": true,
+                                    "dbColumnName": "chargStepNum",
+                                    "width": "m"
+                                },
+                                "Counter Id": {
+                                    "type": "text",
+                                    "hidden": true,
+                                    "dbColumnName": "chargCounter",
+                                    "width": "m"
+                                },
+                                "refDocAndItem": {
+                                    "type": "text",
+                                    "hidden": true,
+                                    "dbColumnName": "refDocAndItem",
+                                    "width": "m"
+                                },
+                                "Invoice Flag": {
+                                    "type": "text",
+                                    "hidden": true,
+                                    "dbColumnName": "invoiceFlag",
+                                    "width": "m"
+                                }
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "columns": [
+                {
+                    "components": [
+                        {
+                            "componentId": "shipmentCst",
+                            "type": "table",
+                            "title": "Shipment Cost Details",
+                            "description": "",
+                            "dataSourceName": "InbdShmentCstBV",
+                            "tableConfig": {
+                                "uniqueColumns": [
+                                    "SNO"
+                                ],
+                                "numberPipeFormat": "1.2-2",
+                                "downloadIcon": false,
+                                "checkbox": false,
+                                "aggregationFooter": true,
+                                "columnFilterIcon": true,
+                                "rowFilterIcon": true,
+                                "fullscreenIcon": true,
+                                "localPagination": true,
+                                "downloadActions": [
+                                    {
+                                        "action": "excelDownload"
+                                    },
+                                    {
+                                        "action": "pdfDownload"
+                                    }
+                                ],
+                                "DataDownload": {
+                                    "downloadColumnName": [
+                                        {
+                                            "label": "Item",
+                                            "property": "Item",
+                                            "dbColumnName": ""
+                                        },
+                                        {
+                                            "label": "Category",
+                                            "property": "Category",
+                                            "dbColumnName": "itemCatg"
+                                        },
+                                        {
+                                            "label": "Currency",
+                                            "property": "Currency",
+                                            "dbColumnName": "currency"
+                                        },
+                                        {
+                                            "label": "Net Value",
+                                            "property": "Net Value",
+                                            "dbColumnName": ""
+                                        },
+                                        {
+                                            "label": "Description",
+                                            "property": "Description",
+                                            "dbColumnName": ""
+                                        },
+                                        {
+                                            "label": "Comments",
+                                            "property": "Comments",
+                                            "dbColumnName": ""
+                                        }
+                                    ]
+                                }
+                            },
+                            "tableColumns": {
+                                "SNO": {
+                                    "mandatory": false,
+                                    "type": "uiRowIndex",
+                                    "sticky": true,
+                                    "hidden": false,
+                                    "dbColumnName": "sno",
+                                    "formcontrol": "sno",
+                                    "componentId": "sno"
+                                },
+                                "Item": {
+                                    "type": "text",
+                                    "dbColumnName": "item"
+                                },
+                                "Category": {
+                                    "type": "text",
+                                    "dbColumnName": "itemCatg"
+                                },
+                                "Service Agent": {
+                                    "type": "text",
+                                    "dbColumnName": "serviceAgent",
+                                    "width": "m",
+                                    "wordWrap": true
+                                },
+                                "Net Value": {
+                                    "type": "number",
+                                    "dataSourceName": "InbdShmentCstBV",
+                                    "dbColumnName": "netValue",
+                                    "textAlign": "right",
+                                    "width": "m"
+                                },
+                                "Currency": {
+                                    "type": "text",
+                                    "dbColumnName": "currency",
+                                    "width": "m"
+                                },
+                                "Description": {
+                                    "type": "text",
+                                    "dbColumnName": "descforRef",
+                                    "trimLeftZeroes": true
+                                },
+                                "Comments": {
+                                    "type": "inputString",
+                                    "dbColumnName": "chargeComment",
+                                    "width": "m"
+                                },
+                                "Delete": {
+                                    "type": "menu",
+                                    "dbColumnName": "",
+                                    "hidden": true,
+                                    "sticky": true,
+                                    "menuDetails": {
+                                        "menuIcon": "feather icon-more-vertical",
+                                        "menuItems": [
+                                            {
+                                                "text": "Delete",
+                                                "icon": "feather icon-trash-2",
+                                                "action": "deleteRow"
+                                            }
+                                        ]
+                                    }
+                                }
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "columns": [
+                {
+                    "components": [
+                        {
+                            "componentId": "4",
+                            "type": "section",
+                            "title": "Attachments",
+                            "Description": "",
+                            "icon": "",
+                            "dataSourceName": "",
+                            "headerComponents": [],
+                            "sectionBody": {
+                                "style": "style1",
+                                "rows": [
+                                    {
+                                        "columns": [
+                                            {
+                                                "width": "30%",
+                                                "components": [
+                                                    {
+                                                        "label": "Invoice Copy",
+                                                        "type": "attachment",
+                                                        "dbColumnName": "invoice",
+                                                        "formcontrol": "invoice",
+                                                        "style": "style3",
+                                                        "iconType": "upload",
+                                                        "editable": true,
+                                                        "articleId": "",
+                                                        "allowUpload": true,
+                                                        "mandatory": true,
+                                                        "componentId": "invoice",
+                                                        "displayStyle": "horizontalKeyValue"
+                                                    }
+                                                ]
+                                            },
+                                            {
+                                                "width": "40%",
+                                                "components": [
+                                                    {
+                                                        "type": "attachment",
+                                                        "dbColumnName": "others",
+                                                        "label": "Other Supporting Documents",
+                                                        "formcontrol": "others",
+                                                        "style": "style3",
+                                                        "iconType": "upload",
+                                                        "editable": true,
+                                                        "articleId": "",
+                                                        "allowUpload": true,
+                                                        "componentId": "others",
+                                                        "displayStyle": "horizontalKeyValue"
+                                                    }
+                                                ]
+                                            },
+                                            {
+                                                "width": "20%",
+                                                "components": [
+                                                    {
+                                                        "type": "number",
+                                                        "dbColumnName": "invoiceAmt1",
+                                                        "label": "Invoice Amt",
+                                                        "hidden": true,
+                                                        "dataSourceName": "SelectedPR",
+                                                        "displayStyle": "horizontalKeyValue",
+                                                        "formControl": "invoiceAmt1",
+                                                        "componentId": "invoiceAmt1"
+                                                    }
+                                                ]
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "columns": [
+                {
+                    "components": [
+                        {
+                            "componentId": "5",
+                            "type": "section",
+                            "title": "Comments",
+                            "Description": "",
+                            "icon": "",
+                            "dataSourceName": "",
+                            "headerComponents": [],
+                            "sectionBody": {
+                                "style": "style1",
+                                "rows": [
+                                    {
+                                        "columns": [
+                                            {
+                                                "width": "60%",
+                                                "components": [
+                                                    {
+                                                        "maxWidth": "l",
+                                                        "type": "textarea",
+                                                        "height": "480px",
+                                                        "dbColumnName": "inboundComment",
+                                                        "label": "",
+                                                        "mandatory": false,
+                                                        "hidden": false,
+                                                        "readOnly": false,
+                                                        "formcontrol": "inboundComment"
+                                                    }
+                                                ]
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "columns": [
+                {
+                    "components": [
+                        {
+                            "componentId": "BankDetails",
+                            "type": "section",
+                            "title": "Supplier Bank Details",
+                            "description": "Supplier Bank Details",
+                            "headerComponents": [],
+                            "sectionBody": {
+                                "style": "style1",
+                                "verticalSpacing": "fixed",
+                                "rows": [
+                                    {
+                                        "columns": [
+                                            {
+                                                "width": "20%",
+                                                "components": [
+                                                    {
+                                                        "label": "Select Bank A/C Number",
+                                                        "type": "select",
+                                                        "formcontrol": "bankAccountNumber",
+                                                        "componentId": "bankAccountNumber",
+                                                        "mandatory": false,
+                                                        "option": true,
+                                                        "dataSourceName": "",
+                                                        "onChangeGetData": true,
+                                                        "filter": true,
+                                                        "hidden": false,
+                                                        "closeOnSelect": true,
+                                                        "style": "style3",
+                                                        "sendAllFieldsInSelectedValueAsObject": false,
+                                                        "dataSource": {
+                                                            "method": "POST",
+                                                            "body": {
+                                                                "businessView": "ISRbankTableBV"
+                                                            },
+                                                            "url": "/lowcode-service/executeBVData",
+                                                            "optionArrayKey": "data",
+                                                            "dropDownKey": "bankAccountNumber",
+                                                            "dropDownValue": "bankAccountNumber"
+                                                        },
+                                                        "onChange": [
+                                                            {
+                                                                "actions": [
+                                                                    {
+                                                                        "action": "setComponentValue",
+                                                                        "actionDetails": {
+                                                                            "targetComponent": [
+                                                                                "section_BankDetails.bankKey",
+                                                                                "section_BankDetails.bankName",
+                                                                                "section_BankDetails.AccountHolderName",
+                                                                                "section_BankDetails.bankAddress",
+                                                                                "section_BankDetails.iban",
+                                                                                "section_BankDetails.swiftIfscCode",
+                                                                                "section_BankDetails.bankCountry"
+                                                                            ],
+                                                                            "url": "/lowcode-service/executeBVData",
+                                                                            "method": "POST"
+                                                                        }
+                                                                    }
+                                                                ]
+                                                            }
+                                                        ],
+                                                        "dbColumnName": "bankAccountNumber"
+                                                    },
+                                                    {
+                                                        "type": "text",
+                                                        "label": "Bank Name",
+                                                        "readOnly": "bankName",
+                                                        "componentId": "bankName",
+                                                        "displayStyle": "verticalKeyValue",
+                                                        "dbColumnName": "bankName",
+                                                        "formcontrol": "bankName",
+                                                        "dataSourceName": "BankInformationBV",
+                                                        "mandatory": false
+                                                    },
+                                                    {
+                                                        "label": "BankID",
+                                                        "type": "text",
+                                                        "displayStyle": "verticalKeyValue",
+                                                        "dbColumnName": "bankKey",
+                                                        "dataSourceName": "BankInformatioBV",
+                                                        "componentId": "bankKey",
+                                                        "formcontrol": "bankKey",
+                                                        "readOnly": "bankKey",
+                                                        "mandatory": false
+                                                    }
+                                                ]
+                                            },
+                                            {
+                                                "width": "20%",
+                                                "components": [
+                                                    {
+                                                        "type": "text",
+                                                        "label": "Bank Account Holder Name",
+                                                        "readOnly": "AccountHolderName",
+                                                        "displayStyle": "verticalKeyValue",
+                                                        "componentId": "AccountHolderName",
+                                                        "formcontrol": "AccountHolderName",
+                                                        "dbColumnName": "AccountHolderName",
+                                                        "dataSourceName": "BankInformationBV",
+                                                        "mandatory": false
+                                                    },
+                                                    {
+                                                        "type": "text",
+                                                        "label": "Branch Address",
+                                                        "componentId": "bankAddress",
+                                                        "dbColumnName": "bankAddress",
+                                                        "formcontrol": "bankAddress",
+                                                        "displayStyle": "verticalKeyValue",
+                                                        "dataSourceName": "BankInformationBV",
+                                                        "readOnly": "bankAddress",
+                                                        "mandatory": false
+                                                    },
+                                                    {
+                                                        "type": "text",
+                                                        "label": "IBAN",
+                                                        "hidden": false,
+                                                        "readOnly": "iban",
+                                                        "mandatory": false,
+                                                        "componentId": "iban",
+                                                        "dbColumnName": "iban",
+                                                        "formcontrol": "iban",
+                                                        "displayStyle": "verticalKeyValue",
+                                                        "dataSourceName": "BankInformationBV"
+                                                    }
+                                                ]
+                                            },
+                                            {
+                                                "width": "20%",
+                                                "components": [
+                                                    {
+                                                        "type": "text",
+                                                        "label": "Swift Code/ IFSC Code",
+                                                        "componentId": "swiftIfscCode",
+                                                        "readOnly": "bankCountry",
+                                                        "displayStyle": "verticalKeyValue",
+                                                        "dbColumnName": "swiftIfscCode",
+                                                        "formcontrol": "swiftIfscCode",
+                                                        "dataSourceName": "BankInformationBV",
+                                                        "mandatory": false
+                                                    },
+                                                    {
+                                                        "label": "Bank Country",
+                                                        "type": "text",
+                                                        "readOnly": "bankCountry",
+                                                        "placeholder": "",
+                                                        "mandatory": false,
+                                                        "displayStyle": "verticalKeyValue",
+                                                        "componentId": "bankCountry",
+                                                        "formcontrol": "bankCountry",
+                                                        "dbColumnName": "bankCountry",
+                                                        "dataSourceName": "BankInformationBV"
+                                                    }
+                                                ]
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
